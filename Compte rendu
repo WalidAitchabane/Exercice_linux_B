@@ -106,203 +106,53 @@ chmod u+x fichier.sh
 
 Le script doit générer des fichiers avec un nom contenant un numéro et la date de création.
 
-Exemple de noms attendus :
+Exemple :
 
 fichier1_2026_11_15_14:30:00.txt
 
-Dans cet exemple :
 
-fichier : préfixe du nom.
-
-1, 2, 3 : numéros générés par une boucle.
-
-20261115 : date au format YYYYMMDD.
-
-143000 : heure au format HHMMSS.
-
-.txt : extension du fichier.
-
-Code source : consulter le fichier fichier.sh pour retrouver le script réalisé.
-
-6.2. Configuration de crontab
+5.2. Configuration de crontab
 
 Ouvrir la table des tâches planifiées de l'utilisateur :
 
+#!/bin/bash
 crontab -e
 
 Ajouter la ligne suivante :
 
-*/2 * * * * /home/admintech/SCRIPTS/my_projects/fichier.sh
+*/2 * * * * /home/admintech/SCRIPTS/my_projects/creation_fichiers.sh
 
-Explication :
+6. Archivage automatique des fichiers
 
-La syntaxe d'une tâche cron comprend cinq champs temporels, suivis de la commande à exécuter.
+Créer une deuxième tâche planifiée permettant d'identifier les fichiers horodatés du jour et de les déplacer vers le répertoire archives.
 
-Champ
+6.1. Commande utilisée pendant le TP
 
-Valeur
+La commande initialement ajoutée à crontab était (Voir le code dans archives_fichiers.sh):
 
-Signification
-
-Minutes
-
-*/2
-
-Toutes les 2 minutes
-
-Heures
-
-*
-
-Toutes les heures
-
-Jour du mois
-
-*
-
-Tous les jours
-
-Mois
-
-*
-
-Tous les mois
-
-Jour de semaine
-
-*
-
-Tous les jours de la semaine
-
-Cette configuration permet de lancer automatiquement le script toutes les deux minutes.
-
-6.3. Vérification
-
-Afficher les tâches planifiées :
-
-crontab -l
-
-Vérifier que le service cron fonctionne :
-
-sudo systemctl status cron
-
-Puis consulter les fichiers générés :
-
-ls -l /home/admintech/SCRIPTS/my_projects
-
-7. Archivage automatique des fichiers
-
-Objectif : créer une deuxième tâche planifiée permettant d'identifier les fichiers horodatés du jour et de les déplacer vers le répertoire archives.
-
-7.1. Principe
-
-Le processus d'archivage doit :
-
-Rechercher les fichiers .txt correspondant à la date du jour.
-
-Identifier les fichiers présents dans le répertoire my_projects.
-
-Déplacer les fichiers sélectionnés vers archives.
-
-Être exécuté automatiquement à l'aide de cron.
-
-7.2. Commande utilisée pendant le TP
-
-La commande initialement ajoutée à crontab était :
-
-*/2 * * * * find /home/admintech1 -type f -name '*.txt' -exec mv {} /home/admintech1/SCRIPTS/archives/ \;
-
-Explication :
-
-find : recherche des fichiers dans une arborescence.
-
--type f : sélectionne uniquement les fichiers.
-
--name '*.txt' : recherche les fichiers ayant l'extension .txt.
-
--exec : exécute une commande sur les fichiers trouvés.
-
-mv : déplace les fichiers.
-
-\; : marque la fin de la commande exécutée par find.
-
-7.3. Amélioration de la tâche planifiée
-
-La commande précédente présente plusieurs limites :
-
-Elle recherche tous les fichiers .txt, sans vérifier leur date.
-
-Elle utilise /home/admintech1 au lieu de /home/admintech.
-
-Elle parcourt un répertoire trop large.
-
-Elle peut déplacer des fichiers qui ne sont pas destinés à être archivés.
-
-Pour répondre plus précisément à l'objectif, il est préférable de créer un script dédié à l'archivage.
-
-Ce script pourra comparer la date du jour avec la date présente dans le nom des fichiers, puis déplacer uniquement les fichiers correspondants.
-
-Exemple de planification quotidienne à 23 h :
+Ajouter la ligne suivante (lanification quotidienne à 23 h) :
 
 0 23 * * * /home/admintech/SCRIPTS/archives_fichiers.sh
 
-Cette ligne suppose que le script archives_fichiers.sh a été créé et rendu exécutable.
+7. Gestion et arrêt des processus Linux
 
-L'archivage quotidien permet de séparer la génération des fichiers de leur traitement et facilite la maintenance.
+Identifier puis arrêter un processus depuis une autre session.
 
-8. Gestion et arrêt des processus Linux
-
-Objectif : comprendre le fonctionnement des processus Linux et apprendre à identifier puis arrêter un processus depuis une autre session.
-
-8.1. Lancement d'une session privilégiée
-
-Depuis une session admintech, exécuter :
+Depuis la session admintech, on exécute :
 
 sudo su
 
 Cette commande permet d'ouvrir un shell avec les privilèges de l'utilisateur root, si les autorisations sudo le permettent.
 
-Laisser cette session ouverte.
+On laisser cette session ouverte.
 
-8.2. Identification du processus
-
-Ouvrir un deuxième terminal et exécuter :
+On ouvre un deuxième terminal et exécuter :
 
 ps aux | grep 'sudo su'
-
-Explication :
-
-ps : affiche les processus en cours d'exécution.
-
-a : inclut les processus des utilisateurs associés à un terminal.
-
-u : affiche des informations détaillées, notamment le propriétaire.
-
-x : inclut également les processus sans terminal de contrôle.
-
-| : transmet la sortie d'une commande à une autre.
-
-grep : filtre les résultats selon un texte recherché.
-
-Cette commande permet de retrouver les processus correspondant à sudo su.
-
-8.3. Arrêt du processus
 
 Une fois le PID identifié, utiliser :
 
 sudo kill 64871
-
-Dans cet exemple, 64871 représente le PID du processus identifié pendant le TP.
-
-Explication :
-
-kill : envoie un signal à un processus.
-
-64871 : identifiant du processus à arrêter.
-
-Par défaut, kill envoie le signal SIGTERM (15), qui demande au processus de se terminer proprement.
-
-Le PID varie à chaque exécution : il faut donc le rechercher avant d'utiliser la commande.
 
 8.4. Vérification
 
